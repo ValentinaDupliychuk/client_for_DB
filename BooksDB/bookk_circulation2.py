@@ -65,10 +65,10 @@ class Circulation_Form(QtWidgets.QWidget):
         self.ui.setupUi(self)
 
         self.initUi()
-        self.initWindows()
+        # self.initWindows()
         # self.closeEvent()
         self.selectAuthor()
-        self.selectTitle()
+        # self.selectTitle()
 
     def initUi(self):
         self.resize(500, 600)
@@ -80,23 +80,31 @@ class Circulation_Form(QtWidgets.QWidget):
         self.ui.comboBox.currentIndexChanged.connect(
             lambda: print(f"Установлено значение {self.ui.comboBox.currentText()}"))
 
-        self.ui.pushButton.clicked.connect(self.open_child_window)
+        # self.ui.pushButton.clicked.connect(self.open_child_window)
         self.ui.lineEdit.editingFinished.connect(self.selectAuthor)
-        self.ui.lineEdit_2.editingFinished.connect(self.selectTitle)
+        # self.ui.lineEdit_2.editingFinished.connect(self.selectTitle)
 
 
     def selectAuthor(self):
-        print(f"SELECT BT.author FROM Books.title AS BT WHERE BT.author LIKE %{self.ui.lineEdit.text()}%")
+        server = 'tcp:vpngw.avalon.ru'
+        database = 'library'
+        username = 'tsqllogin'
+        password = 'Pa$$w0rd'
 
-    def selectTitle(self):
-        print(f"SELECT BT.author FROM Books.title AS BT WHERE BT.title LIKE %{self.ui.lineEdit.text()}%")
+        self.conn = pyodbc.connect(
+                'DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + server + ';DATABASE=' + database + ';UID=' + username + ';PWD=' + password)
+        self.cursor = self.conn.cursor()
 
-    def initWindows(self):
-        self.child_window = MyFirstWindow()
-        self.child_window.send_data.connect(lambda x: print(f"Main {x}"))
-
-    def open_child_window(self):
-        self.child_window.show()
+        self.cursor.execute(f"SELECT BT.author FROM Books.title AS BT WHERE BT.author LIKE '%{self.ui.lineEdit.text()}%'")
+        print(self.cursor.fetchone())
+        self.cursor.execute(f"SELECT BT.author FROM Books.title AS BT WHERE BT.title LIKE '{self.ui.lineEdit_2.text()}%'")
+        print(self.cursor.fetchone())
+    # def initWindows(self):
+    #     self.child_window = MyFirstWindow()
+    #     self.child_window.send_data.connect(lambda x: print(f"Main {x}"))
+    #
+    # def open_child_window(self):
+    #     self.child_window.show()
 
 
 class MyFirstWindow(QtWidgets.QWidget):
@@ -165,7 +173,7 @@ class MyFirstWindow(QtWidgets.QWidget):
 if __name__ == "__main__":
     app = QtWidgets.QApplication()
 
-    myWindow1 = Authorization()
+    myWindow1 = Circulation_Form()
     myWindow1.show()
 
     # myWindow = MyFirstWindow()
